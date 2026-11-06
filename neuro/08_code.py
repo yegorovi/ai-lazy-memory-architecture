@@ -1,24 +1,20 @@
-# 08_code.py - нейрон, softmax, токенизатор и внимание руками.
-# Запуск: python 08_code.py. Чистый Python, библиотек не нужно.
-
 import math
 
 
-# один нейрон: взвешенная сумма входов
-def neuron(inputs, weights, bias):
+
+def neuron(inputs, weights, bias) -> int:
+	'''один нейрон: взвешенная сумма входов'''
 	total = bias
 	for x, w in zip(inputs, weights):
 		total += x * w
 	return total
 
-
-# активация ReLU: отрицательное обнуляем
-def relu(x):
+def relu(x) -> float | int:
+	'''Обнуление отрицательного'''
 	return x if x > 0 else 0
 
-
-# умножение матрицы на вектор по правилу строка-на-вектор
-def matvec(matrix, vector):
+def matvec(matrix, vector) -> list:
+	'''умножение матрицы на вектор по правилу строка на вектор'''
 	out = []
 	for row in matrix:
 		sum_ = 0
@@ -27,22 +23,18 @@ def matvec(matrix, vector):
 		out.append(sum_)
 	return out
 
-
-# превращаем сырые оценки в вероятности (сумма = 1)
-def softmax(logits):
-	# сначала вычитаем максимум - защита от переполнения exp
+def softmax(logits) -> softmax:
+	'''превращает сырые оценки в вероятности (сумма = 1)'''
 	m = max(logits)
 	exps = [math.exp(x - m) for x in logits]
 	total = sum(exps)
 	return [e / total for e in exps]
 
-
-# простой токенизатор: словарь частых кусков, режем жадно
-def tokenize(text, vocab):
+def tokenize(text, vocab) -> list:
+	'''простой токенизатор'''
 	tokens = []
 	i = 0
 	while i < len(text):
-		# ищем самый длинный подходящий кусок
 		for j in range(len(text), i, -1):
 			piece = text[i:j]
 			if piece in vocab:
@@ -50,13 +42,12 @@ def tokenize(text, vocab):
 				i = j
 				break
 		else:
-			i += 1  # неизвестный символ пропускаем
+			i += 1
 	return tokens
 
 
-# одно голово внимание: запрос, ключи, значения -> взвешенный итог
-def attention(query, keys, values):
-	# оценки: скалярное произведение запроса на каждый ключ
+def attention(query, keys, values) -> tuple:
+	'''оценка скалярное произведение запроса на каждый ключ'''
 	scores = []
 	for k in keys:
 		dot = 0
@@ -73,11 +64,11 @@ def attention(query, keys, values):
 	return weights, out
 
 
-# нейрон и активация
+# ввод нейронов
 print(neuron([25, 90], [0.1, 0.8], -50))
 print(relu(neuron([25, 90], [0.1, 0.8], -50)))
 
-# матрица на вектор: усиливает второй вход, первый не трогает
+# матрица на вектор - усиливает второй вход, первый не трогает
 print(matvec([[1, 0], [0, 2]], [2, 3]))
 
 # логиты в вероятности
@@ -87,7 +78,6 @@ print(softmax([2, 1, 0.1]))
 vocab = {"привет": 1, "мир": 2, " ": 3}
 print(tokenize("привет мир", vocab))
 
-# внимание: три токена, вектор из двух чисел
 query = [1.0, 0.0]
 keys = [[1.0, 0.0], [0.0, 1.0], [0.7, 0.7]]
 values = [[10.0, 0.0], [0.0, 20.0], [5.0, 5.0]]
